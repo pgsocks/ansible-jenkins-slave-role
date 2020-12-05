@@ -1,0 +1,47 @@
+---
+
+- name: Install Jenkins Dependencies
+  win_chocolatey:
+    name:
+      - jre8
+      - javaruntime
+      - nssm
+      - git
+- name: Find Java
+  win_find:
+    paths: 'C:\Program Files\java'
+    recurse: yes
+    patterns: [ 'java.exe' ]
+  register: found_java
+  failed_when: 'found_java.matched != 1'
+- name: Set Java Fact
+  set_fact:
+    java: '{{ found_java.files[0].path }}'
+
+- name: Make Jenkins Home
+  win_file:
+    path: '{{ jenkins_home }}'
+    state: directory
+
+- name: Download Agent Jar
+  win_get_url:
+    url: '{{ slave_url }}'
+    dest: '{{ slave_path }}'
+
+- name: Create Service Script
+  win_template:
+    src: service.bat.j2
+    dest: '{{ jenkins_home }}\service.bat'
+
+- name: Create Jenkins Slave Service
+  win_nssm:
+    name: '{{ service_name }}'
+    display_name: '{{ service_display_name }}'
+    application: '{{ jenkins_home }}\service.bat'
+    working_directory: '{{ jenkins_home }}'
+
+- name: Start Jenkins Slave Service
+  win_service:
+    name: '{{ service_name }}'
+    state: restarted
+

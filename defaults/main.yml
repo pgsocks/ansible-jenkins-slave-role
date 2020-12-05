@@ -1,0 +1,9 @@
+---
+service_name: Jenkins_Slave
+service_display_name: Jenkins Slave
+java: java
+jnlp_url: '{{ master_url }}/computer/{{ slave_name }}/slave-agent.jnlp'
+jenkins_home: 'C:\jenkins'
+slave_url: '{{ master_url }}/jnlpJars/slave.jar'
+slave_path: '{{ jenkins_home }}\jenkins-slave.jar'
+
